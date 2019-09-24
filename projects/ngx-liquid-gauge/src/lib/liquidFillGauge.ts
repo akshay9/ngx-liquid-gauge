@@ -130,16 +130,16 @@ export function loadLiquidFillGauge(elementId, value, config) {
   const gaugeGroup = gauge.append('g')
     .attr('transform', 'translate(' + locationX + ',' + locationY + ')');
 
-  // Draw the outer circle.
-  const gaugeCircleArc = d3.arc()
-    .startAngle(gaugeCircleX(0))
-    .endAngle(gaugeCircleX(1))
-    .outerRadius(gaugeCircleY(radius))
-    .innerRadius(gaugeCircleY(radius - circleThickness));
+  // Draw the outer Rectangle.
+  var rectpoints = [{x: 0, y: 0}, {x: 0, y: parseInt(gauge.style('height'))}, {x: parseInt(gauge.style('width'), 10), y: parseInt(gauge.style('height'))}, {x: parseInt(gauge.style('width'), 10), y: 0}, {x: 0, y: 0}];
+  var lineFunc = line()
+      .x(function(d) { return d.x })
+      .y(function(d) { return d.y });
   gaugeGroup.append('path')
-    .attr('d', gaugeCircleArc)
-    .style('fill', config.circleColor)
-    .attr('transform', 'translate(' + radius + ',' + radius + ')');
+    .attr('d', lineFunc(rectpoints))
+    .attr('stroke', config.circleColor)
+    .attr('stroke-width', circleThickness)
+    .attr('fill', 'none');
 
   // Text where the wave does not overlap.
   const text1 = gaugeGroup.append('text')
@@ -172,11 +172,12 @@ export function loadLiquidFillGauge(elementId, value, config) {
   // The inner circle with the clipping wave attached.
   const fillCircleGroup = gaugeGroup.append('g')
     .attr('clip-path', 'url(#clipWave' + elementId + ')');
-  fillCircleGroup.append('circle')
-    .attr('cx', radius)
-    .attr('cy', radius)
-    .attr('r', fillCircleRadius)
-    .style('fill', config.waveColor);
+  fillCircleGroup.append('rect')
+        .attr('x', (radius) - fillCircleRadius)
+        .attr('y', radius - fillCircleRadius)
+        .attr('width', fillCircleRadius*2)
+        .attr('height', fillCircleRadius*2)
+        .style('fill', config.waveColor);
 
   // Text where the wave does overlap.
   const text2 = fillCircleGroup.append('text')
